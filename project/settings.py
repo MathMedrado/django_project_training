@@ -20,12 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fked(5h8+ku46of4b(*u^)5@=-=e6!#jch=0)=b3hw*s_-dtrn'
+SECRET_KEY = 'django-insecure-fked(5h8+ku46of4b(*u^)5@=-=e6!#jch=0)=b3hw*s_-dtrn' #noqa: E501
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = []
 
 
 # Application definition
@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
  
 USE_I18N = True
 
