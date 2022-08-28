@@ -1,4 +1,6 @@
 
+from unicodedata import category
+
 from django.urls import resolve, reverse
 from recipes import views
 from recipes.tests.test_recipe_base import RecipeTestBase
@@ -47,13 +49,10 @@ class RecipeURLSTest(RecipeTestBase):
         self.assertEqual(len(response_context_recipes), 1)
     
     def test_recipe_home_template_dont_load_recipes_not_published(self):
-        needed_title = 'This is a category test'
         self.make_recipe(is_published=False)
 
-        response = self.client.get(reverse("recipes:category", args=(1,)))
-        content = response.content.decode('utf-8')
-
-        self.assertIn(needed_title, content)
+        response = self.client.get(reverse("recipes:home"))
+        self.assertIn('No recipes found here', response.content.decode('utf-8'))
 
     def test_recipe_category_url_is_correct(self):
         url = reverse("recipes:category", kwargs={'category_id':1})
@@ -72,13 +71,20 @@ class RecipeURLSTest(RecipeTestBase):
 
         self.assertIn(needed_title, content)
 
+    def test_recipe_category_template_dont_load_recipes_not_published(self):
+        recipe = self.make_recipe(is_published=False)
+
+        response = self.client.get(reverse("recipes:category", kwargs={'category_id': recipe.category.id}))
+        self.assertEqual(response.status_code, 404)
+
+
 
     def test_recipe_detail_url_is_correct(self):
         url = reverse("recipes:recipe", kwargs={'id':1})
         self.assertEqual(url, '/recipes/1/')
 
     def test_recipe_detail_view_returns_status_code_404_if_no_recipe(self):
-        response = self.client.get(reverse("recipes:recipe", kwargs={'id':1000}))
+        response = self.client.get(reverse("recipes:recipe", kwargs={'id':1}))
         self.assertEqual(response.status_code, 404)
 
     def test_recipe_detail_template_loads_recipes(self):
@@ -89,6 +95,12 @@ class RecipeURLSTest(RecipeTestBase):
         content = response.content.decode('utf-8')
 
         self.assertIn(needed_title, content)
+    
+    def test_recipe_detail_template_dont_load_recipe_not_published(self):
+        recipe  = self.make_recipe(is_published=False)
+
+        response = self.client.get(reverse("recipes:recipe",  kwargs={'id':recipe.id,}))
+        self.assertEqual(response.status_code, 404)
 
     def test_recipe_search_url_is_Correct(self):
         url = reverse('recipes:search')
