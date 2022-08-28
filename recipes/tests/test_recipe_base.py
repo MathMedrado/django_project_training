@@ -5,21 +5,6 @@ from recipes.models import Category, Recipe, User
 
 class RecipeTestBase(TestCase):
     def setUp(self) -> None:
-        category = self.make_category()
-        author = self.make_author()
-        recipe =  Recipe.objects.create(
-            category=category, 
-            author=author, 
-            title='title', 
-            description='Recipe description',
-            preparation_time='5', 
-            slug='recipe-slug', 
-            preparation_time_unit='Minutos', 
-            servings='4', 
-            servings_unit='pessoas', 
-            preparation_steps='lalalalala',
-            preparation_steps_is_html=False,
-            is_published=True)
 
         return super().setUp()
     
@@ -43,8 +28,8 @@ class RecipeTestBase(TestCase):
 
     def make_recipe(
         self,
-        category=category, 
-        author=author, 
+        category_data=None, 
+        author_data=None, 
         title='title', 
         description='Recipe description',
         preparation_time='5', 
@@ -56,9 +41,15 @@ class RecipeTestBase(TestCase):
         preparation_steps_is_html=False,
         is_published=True
     ):
+        if category_data is None:
+            category_data = {}
+
+        if author_data is None:
+            author_data = {}
+
         return Recipe.objects.create(
-            category=category, 
-            author=author, 
+            category=self.make_category(**category_data), 
+            author=self.make_author(**author_data), 
             title=title, 
             description=description,
             preparation_time=preparation_time, 

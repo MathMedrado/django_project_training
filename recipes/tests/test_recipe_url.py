@@ -1,7 +1,6 @@
 
 from django.urls import resolve, reverse
 from recipes import views
-from recipes.models import Recipe
 from recipes.tests.test_recipe_base import RecipeTestBase
 
 # Create your tests here.
@@ -30,18 +29,31 @@ class RecipeURLSTest(RecipeTestBase):
         self.assertTemplateUsed(response, 'recipes/pages/home.html')
 
     def test_recipe_home_template_shows_no_recipes_found_if_no_recipes(self):
-        Recipe.objects.get(pk=1).delete()
         response = self.client.get(reverse("recipes:home"))
         self.assertIn('No recipes found here', response.content.decode('utf-8'))
 
     def test_recipe_home_template_loads_recipes(self):
-
+        #need a recipe to this test
+        self.make_recipe(author_data={'first_name':"mathew"})
         response = self.client.get(reverse("recipes:home"))
         content = response.content.decode('utf-8')
         response_context_recipes = response.context['recipes']
+        
+        #check if recipe exist
         self.assertIn('title', content)
         self.assertIn('5   Minutos', content)
+        self.assertIn('mathew', content)
+
         self.assertEqual(len(response_context_recipes), 1)
+    
+    def test_recipe_home_template_dont_load_recipes_not_published(self):
+        needed_title = 'This is a category test'
+        self.make_recipe(is_published=False)
+
+        response = self.client.get(reverse("recipes:category", args=(1,)))
+        content = response.content.decode('utf-8')
+
+        self.assertIn(needed_title, content)
 
     def test_recipe_category_url_is_correct(self):
         url = reverse("recipes:category", kwargs={'category_id':1})
@@ -51,6 +63,15 @@ class RecipeURLSTest(RecipeTestBase):
         response = self.client.get(reverse("recipes:category", kwargs={'category_id':1000}))
         self.assertEqual(response.status_code, 404)
 
+    def test_recipe_category_template_loads_recipes(self):
+        needed_title = 'This is a category test'
+        self.make_recipe(title=needed_title)
+
+        response = self.client.get(reverse("recipes:category", args=(1,)))
+        content = response.content.decode('utf-8')
+
+        self.assertIn(needed_title, content)
+
 
     def test_recipe_detail_url_is_correct(self):
         url = reverse("recipes:recipe", kwargs={'id':1})
@@ -59,6 +80,15 @@ class RecipeURLSTest(RecipeTestBase):
     def test_recipe_detail_view_returns_status_code_404_if_no_recipe(self):
         response = self.client.get(reverse("recipes:recipe", kwargs={'id':1000}))
         self.assertEqual(response.status_code, 404)
+
+    def test_recipe_detail_template_loads_recipes(self):
+        needed_title = 'This is a detail page - and loads only one recipe'
+        self.make_recipe(title=needed_title)
+
+        response = self.client.get(reverse("recipes:recipe", kwargs={'id':1,}))
+        content = response.content.decode('utf-8')
+
+        self.assertIn(needed_title, content)
 
     def test_recipe_search_url_is_Correct(self):
         url = reverse('recipes:search')
